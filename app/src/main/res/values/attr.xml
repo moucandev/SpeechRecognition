@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="VolumCircleBar" >
+        <attr name="recordingColor" format="color"/>
+        <attr name="stoppedColor" format="color"/>
+        <attr name="centerRes" format="integer"/>
+        <attr name="blockCount" format="integer"/>
+        <attr name="splitAngle" format="integer"/>
+    </declare-styleable>
+</resources>
