@@ -7,9 +7,6 @@ import android.media.MediaRecorder;
 import android.os.Handler;
 import android.util.Log;
 
-/**
- * Created by MarioStudio on 2016/5/12.
- */
 
 public class AudioRecorderUtils {
 
@@ -88,6 +85,28 @@ public class AudioRecorderUtils {
 
         Log.i("ACTION_LENGTH", "Time" + (endTime - startTime));
         return endTime - startTime;
+    }
+    /**
+     * 取消录音
+     */
+    public void cancelRecord() {
+
+        try {
+
+            mMediaRecorder.stop();
+            mMediaRecorder.reset();
+            mMediaRecorder.release();
+            mMediaRecorder = null;
+
+        } catch (RuntimeException e) {
+            mMediaRecorder = null;
+        }
+        File file = new File(filePath);
+        if (file.exists())
+            file.delete();
+
+        filePath = "";
+
     }
 
     private final Handler mHandler = new Handler();

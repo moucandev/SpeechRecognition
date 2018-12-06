@@ -4,10 +4,10 @@
     android:layout_height="231dp"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    android:background="#ffffff">
+    android:background="@drawable/bg_circle">
     <ImageView
         android:src="@drawable/clip_drawable"
-        android:id="@+id/iv_recording"
+        android:id="@+id/recording"
         android:layout_gravity="center"
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -34,6 +34,7 @@
             android:id="@+id/tv_start"
             android:gravity="center"
             android:text="开始"
+            android:background="@drawable/bg_circle_bottom_left"
             android:textSize="15sp"
             android:textColor="#333333"
             android:layout_width="0dp"
@@ -64,7 +65,8 @@
             android:text="取消"
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:background="@drawable/bg_circle_bottom_right"/>
     </LinearLayout>
 
 

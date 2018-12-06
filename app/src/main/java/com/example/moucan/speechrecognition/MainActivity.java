@@ -2,8 +2,6 @@ package com.example.moucan.speechrecognition;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -15,24 +13,20 @@ import android.util.TimeUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.Unbinder;
-import butterknife.internal.Utils;
 
-public class MainActivity extends AppCompatActivity implements AudioRecorderUtils.OnAudioStatusUpdateListener {
+public class MainActivity extends AppCompatActivity{
 
     @BindView(R.id.iv_back)
     ImageView ivBack;
@@ -54,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderUtil
     private List<String> list;
     private File file;
     private AudioRecorderUtils recorderUtils;
+    private long downTime;
+    private long exitTime = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,40 +102,66 @@ public class MainActivity extends AppCompatActivity implements AudioRecorderUtil
         popupWindow.showAtLocation(contentView, Gravity.CENTER, 0, 0);
         popupWindow.setOutsideTouchable(false);
         popupWindow.showAsDropDown(view);
+        setAlpha(0.5f);
         TextView start = (TextView) contentView.findViewById(R.id.tv_start);
         TextView end = (TextView) contentView.findViewById(R.id.tv_end);
         TextView cancel = (TextView) contentView.findViewById(R.id.tv_cancel);
         TextView displayTime = (TextView) contentView.findViewById(R.id.tv_timer);
-        ImageView record = (ImageView) contentView.findViewById(R.id.iv_recording);
+        ImageView record = (ImageView) contentView.findViewById(R.id.recording);
+
+        end.setEnabled(false);
         File filePath=new File(Environment.getExternalStorageDirectory()+"/sound");
         if (!filePath.exists()){
             filePath.mkdir();
         }
-        file=new File(Environment.getExternalStorageDirectory()+"/sound/"+TimeUtils.getTimeZoneDatabaseVersion()+".mp3");
+        file=new File(Environment.getExternalStorageDirectory()+"/sound/"+"mySound"+".mp3");
         Log.e("Sound",file.getAbsolutePath());
+        recorderUtils=new AudioRecorderUtils(file);
+        recorderUtils.setOnAudioStatusUpdateListener(db ->{
+            record.getDrawable().setLevel ((int)(3000 + 6000 * db / 100));
+            displayTime.setText(ProgressTextUtils.getProgressText(System.currentTimeMillis()-downTime));
+        });
         start.setOnClickListener(v -> {
-            recorderUtils=new AudioRecorderUtils(file);
             recorderUtils.startRecord();
+            downTime=System.currentTimeMillis();
+            end.setEnabled(true);
+            start.setEnabled(false);
         });
         end.setOnClickListener(v -> {
             if (recorderUtils!=null){
+                start.setEnabled(true);
+                end.setEnabled(false);
                 recorderUtils.stopRecord();
                 popupWindow.dismiss();
+                setAlpha(1.0f);
             }
+            Toast.makeText(this,"语音存放在"+Environment.getExternalStorageDirectory()+"/sound"+"路径下",Toast.LENGTH_SHORT).show();
 
         });
         cancel.setOnClickListener(v -> {
+            if (recorderUtils!=null){
+                recorderUtils.cancelRecord();
+            }
             popupWindow.dismiss();
+            setAlpha(1.0f);
         });
 
     }
-    public void setLevel(int level) {
-        ivSound.getDrawable().setLevel(3000 + 6000 * level / 100);
-    }
 
     @Override
-    public void onUpdate(double db) {
-        setLevel((int) db);
-
+    public void onBackPressed() {
+        if (System.currentTimeMillis()-exitTime > 1500){
+            Toast.makeText(this,"再按一次退出程序",Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        }else {
+            finish();
+        }
     }
+
+    private void setAlpha(float alpha){
+        WindowManager.LayoutParams lp=getWindow().getAttributes();
+        lp.alpha=alpha;
+        getWindow().setAttributes(lp);
+    }
+
 }
